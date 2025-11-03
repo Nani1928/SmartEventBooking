@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book an Event</title>
+  <style>
+    body {
+      background-color: #0d1117;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .form-container {
+      background: #161b22;
+      padding: 30px;
+      border-radius: 15px;
+      width: 400px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+      text-align: center;
+      color: #3b82f6;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: none;
+      background: #21262d;
+      color: white;
+    }
+
+    button {
+      width: 100%;
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #2563eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Book an Event</h2>
+    <label>Your Name</label>
+    <input type="text" id="name" placeholder="Enter your name" required>
+
+    <label>Your Email</label>
+    <input type="email" id="email" placeholder="Enter your email" required>
+
+    <label>Event Name</label>
+    <input type="text" id="eventName" placeholder="Event name" required>
+
+    <label>City</label>
+    <input type="text" id="city" placeholder="Enter city">
+
+    <label>Date</label>
+    <input type="date" id="eventDate">
+
+    <label>Number of Tickets</label>
+    <input type="number" id="tickets" placeholder="Number of tickets" required>
+
+    <label>Total Amount (₹)</label>
+    <input type="text" id="total" placeholder="Total price" required>
+
+    <button type="button" id="proceedToPayment">Proceed to Payment</button>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const proceedBtn = document.getElementById("proceedToPayment");
+
+      proceedBtn.addEventListener("click", () => {
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const eventName = document.getElementById("eventName").value.trim();
+        const eventDate = document.getElementById("eventDate").value.trim();
+        const city = document.getElementById("city").value.trim();
+        const tickets = document.getElementById("tickets").value.trim();
+        const total = document.getElementById("total").value.trim();
+
+        if (!name || !email || !eventName || !tickets || !total) {
+          alert("Please fill all required fields!");
+          return;
+        }
+
+        const bookingData = {
+          name,
+          email,
+          eventName,
+          eventDate,
+          city,
+          tickets,
+          total
+        };
+
+        sessionStorage.setItem("bookingData", JSON.stringify(bookingData));
+        console.log("✅ Booking data saved:", bookingData);
+
+        window.location.href = "payment-options.html";
+      });
+    });
+  </script>
+</body>
+</html>

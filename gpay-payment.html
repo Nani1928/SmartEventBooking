@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Google Pay</title>
+<style>
+ :root{--accent:#0ea5a8}
+ body{margin:0;font-family:Poppins,sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);min-height:100vh;display:flex;align-items:center;justify-content:center;color:#fff}
+ .box{width:420px;background:#0b1320;padding:28px;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.5);text-align:center}
+ img.logo{width:84px;margin-bottom:10px}
+ h2{color:var(--accent);margin:6px 0 12px}
+ .muted{color:#9aa9bf;margin-bottom:12px}
+ label{display:block;text-align:left;margin-bottom:6px;color:#cbd5e1}
+ input{width:100%;padding:12px;border-radius:8px;border:1px solid #22303b;background:#0f172a;color:#fff;margin-bottom:10px}
+ button{margin-top:6px;width:100%;padding:12px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-weight:700;cursor:pointer}
+ a.back{display:inline-block;margin-top:10px;color:#9fbff6;text-decoration:none}
+</style>
+</head>
+<body>
+  <div class="box">
+    <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="GPay">
+    <h2>Pay with GPay</h2>
+    <div class="muted">Enter Google Pay UPI ID or phone number linked to GPay.</div>
+
+    <form id="gpayForm">
+      <label>GPay UPI ID / Phone</label>
+      <input id="gpayId" placeholder="example@upi or 98xxxxxxxx" />
+      <button type="submit">Proceed to Pay</button>
+    </form>
+
+    <a class="back" href="payment-options.html">← Back to Payment Options</a>
+  </div>
+
+<script>
+document.getElementById("payButton").addEventListener("click", async () => {
+    const upiId = document.querySelector("input").value;
+    if (!upiId) {
+        alert("Please enter your GPay UPI ID.");
+        return;
+    }
+
+    const response = await fetch("/process-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ upi_id: upiId, payment_method: "GPay" })
+    });
+
+    const result = await response.json();
+    alert(result.message);
+    if (result.success) window.location.href = "success.html";
+});
+</script>
+
+</body>
+</html>

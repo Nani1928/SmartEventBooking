@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UPI Payment</title>
+  <style>
+    /* keep your styles — same look as before */
+    body{margin:0;font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;display:flex;justify-content:center;align-items:center;height:100vh}
+    .upi-container{background:#111827;padding:40px;border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.4);width:420px;text-align:center}
+    h2{font-size:26px;margin-bottom:15px;color:#60a5fa}
+    p{color:#94a3b8;margin-bottom:20px}
+    .upi-logo{width:90px;margin-bottom:10px}
+    .form-group{margin-bottom:18px;text-align:left}
+    .form-group label{display:block;font-size:14px;color:#cbd5e1;margin-bottom:6px}
+    .form-group input{width:100%;padding:12px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#fff;outline:none}
+    .btn{width:100%;padding:14px;border:none;background:#2563eb;border-radius:8px;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+    .back-link{display:block;margin-top:15px;font-size:14px;color:#3b82f6;text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="upi-container">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg" class="upi-logo" alt="UPI Logo" />
+    <h2>Pay with UPI</h2>
+    <p>Enter your UPI ID to complete the booking securely.</p>
+
+    <form id="upiForm">
+      <div class="form-group">
+        <label>UPI ID</label>
+        <input type="text" id="upiId" placeholder="example@upi" required />
+      </div>
+      <button type="submit" class="btn">Proceed to Pay</button>
+    </form>
+
+    <a href="payment-options.html" class="back-link">← Back to Payment Options</a>
+  </div>
+
+  <script>
+document.querySelector("button").addEventListener("click", async () => {
+  const upiId = document.querySelector("input").value.trim();
+
+  if (!upiId) {
+    alert("Please enter your UPI ID!");
+    return;
+  }
+
+  const booking = JSON.parse(localStorage.getItem("bookingData"));
+  if (!booking) {
+    alert("Booking data missing. Please book again.");
+    window.location.href = "booking.html";
+    return;
+  }
+
+  booking.paymentMethod = "UPI";
+  booking.upiId = upiId;
+
+  try {
+    const res = await fetch("http://localhost:3000/payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(booking)
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert("✅ Payment successful!");
+      localStorage.removeItem("bookingData");
+      window.location.href = "success.html";
+    } else {
+      alert("❌ " + data.message);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Server error. Please try again.");
+  }
+});
+</script>
+
+</body>
+</html>

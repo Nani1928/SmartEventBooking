@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Card Payment</title>
+<style>
+  :root{--accent:#2563eb}
+  body{margin:0;font-family:Poppins,sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);min-height:100vh;display:flex;align-items:center;justify-content:center;color:#fff}
+  .box{width:420px;background:#0b1320;padding:28px;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.5);text-align:center}
+  img.logo{width:84px;margin-bottom:10px}
+  h2{color:var(--accent);margin:6px 0 12px}
+  .muted{color:#9aa9bf;margin-bottom:12px}
+  label{display:block;text-align:left;margin-bottom:6px;color:#cbd5e1}
+  input{width:100%;padding:12px;border-radius:8px;border:1px solid #22303b;background:#0f172a;color:#fff;margin-bottom:10px}
+  .row{display:flex;gap:8px}
+  button{margin-top:6px;width:100%;padding:12px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-weight:700;cursor:pointer}
+  a.back{display:inline-block;margin-top:10px;color:#9fbff6;text-decoration:none}
+</style>
+</head>
+<body>
+  <div class="box">
+    <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Card">
+    <h2>Card Payment</h2>
+    <div class="muted">Enter card details to complete booking.</div>
+
+    <form id="cardForm">
+      <label>Card Number</label>
+      <input id="cardNumber" maxlength="19" placeholder="1234 5678 9012 3456" />
+      <div class="row">
+        <div style="flex:1">
+          <label>Expiry (MM/YY)</label><input id="expiry" placeholder="MM/YY" />
+        </div>
+        <div style="width:110px">
+          <label>CVV</label><input id="cvv" maxlength="4" placeholder="•••" />
+        </div>
+      </div>
+      <button type="submit">Pay Now</button>
+    </form>
+
+    <a class="back" href="payment-options.html">← Back to Payment Options</a>
+  </div>
+
+<script>
+document.getElementById("payButton").addEventListener("click", async () => {
+    const cardNumber = document.querySelector("input[name='card_number']").value;
+    const expiryDate = document.querySelector("input[name='expiry_date']").value;
+    const cvv = document.querySelector("input[name='cvv']").value;
+
+    if (!cardNumber || !expiryDate || !cvv) {
+        alert("Please fill all card details.");
+        return;
+    }
+
+    const response = await fetch("/process-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ card_number: cardNumber, expiry_date: expiryDate, cvv: cvv, payment_method: "Card" })
+    });
+
+    const result = await response.json();
+    alert(result.message);
+    if (result.success) window.location.href = "success.html";
+});
+</script>
+
+
+</body>
+</html>

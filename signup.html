@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Event Booking - Sign Up</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b 70%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+    }
+    .signup-box {
+      background: #111827;
+      padding: 30px;
+      border-radius: 18px;
+      width: 360px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+    .signup-box h2 {
+      margin-bottom: 15px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+    .form-group label {
+      font-size: 14px;
+      margin-bottom: 5px;
+      display: block;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: #2563eb;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .btn:hover {
+      background: #1d4ed8;
+    }
+    .extra {
+      margin-top: 12px;
+      font-size: 14px;
+    }
+    .extra a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="signup-box">
+    <h2>Sign Up</h2>
+    <form id="signupForm">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" name="password" placeholder="Create a password" required>
+      </div>
+      <button type="submit" class="btn">Sign Up</button>
+    </form>
+
+    <div class="extra">
+      <p>Already have an account? <a href="login.html">Login here</a></p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("signupForm");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        if (!name || !email || !password) {
+          alert("Please fill all fields!");
+          return;
+        }
+
+        try {
+          const response = await fetch("http://localhost:3000/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email, password })
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            alert(data.message || "Signup successful!");
+            form.reset();
+            window.location.href = "login.html"; // ✅ Redirect after success
+          } else {
+            alert(data.message || "Signup failed!");
+          }
+
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Server not responding. Please check if Node.js is running.");
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

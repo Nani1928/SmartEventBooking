@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Event Booking</title>
+
+  <!-- ====== Styles (merged) ====== -->
+  <style>
+    :root{
+      --bg:#0f172a;            /* slate-900 */
+      --panel:#111827;         /* gray-900 */
+      --muted:#94a3b8;         /* slate-400 */
+      --card:#ffffff;
+      --brand:#2563eb;         /* blue-600 */
+      --brand-2:#1d4ed8;       /* blue-700 */
+      --ok:#10b981;            /* emerald-500 */
+      --danger:#ef4444;        /* red-500 */
+      --ring:rgba(37,99,235,.35);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
+      background:linear-gradient(135deg,var(--bg),#1f2937 70%);
+      color:#fff;
+    }
+
+    /* Layout */
+    .container{
+      max-width:1100px;
+      margin:0 auto;
+      padding:24px 16px 56px;
+      display:grid;
+      grid-template-columns: 280px 1fr;
+      gap:20px;
+    }
+    @media (max-width:900px){
+      .container{grid-template-columns:1fr}
+      .sidebar{position:static}
+    }
+
+    header.site{
+      position:sticky;
+      top:0;
+      z-index:5;
+      backdrop-filter:saturate(150%) blur(8px);
+      background:rgba(15,23,42,.7);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .nav{
+      max-width:1100px;
+      margin:0 auto;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      gap:16px;
+    }
+    .brand{
+      display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px
+    }
+    .brand .logo{
+      width:28px;height:28px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--ok));
+      display:grid;place-items:center;font-weight:900
+    }
+    .nav a{
+      color:#e5e7eb;text-decoration:none;font-weight:600;opacity:.9;
+      padding:8px 10px;border-radius:10px
+    }
+    .nav a:hover{background:rgba(255,255,255,.08)}
+    .nav .spacer{flex:1}
+    .nav .chip{
+      background:rgba(37,99,235,.15);
+      border:1px solid rgba(37,99,235,.35);
+      color:#c7d2fe;border-radius:999px;padding:6px 10px;font-size:.85rem
+    }
+
+    /* Sidebar */
+    .sidebar{
+      position:sticky; top:76px; align-self:start;
+      background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:24px; padding:22px;
+    }
+    .sidebar h2{margin:0 0 6px 0;font-size:1.6rem}
+    .sidebar p{margin:0;color:var(--muted)}
+    .filters{margin-top:18px;display:grid;gap:10px}
+    .input, select{
+      width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.15);
+      background:#0b1220; color:#e5e7eb; outline:none;
+    }
+    .input:focus, select:focus{box-shadow:0 0 0 4px var(--ring); border-color:var(--brand)}
+    .clear-btn{
+      margin-top:6px; background:transparent; border:1px dashed rgba(255,255,255,.25);
+      color:#e5e7eb; padding:8px 12px; border-radius:12px; cursor:pointer
+    }
+    .clear-btn:hover{background:rgba(255,255,255,.06)}
+
+    /* Sections */
+    section{scroll-margin-top:90px}
+    .section-header{
+      display:flex; align-items:end; justify-content:space-between; margin:8px 0 14px;
+    }
+    .section-header h3{margin:0;font-size:1.4rem}
+    .muted{color:var(--muted)}
+
+    /* Cards */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat( auto-fill, minmax(260px,1fr) );
+      gap:18px;
+    }
+    .card{
+      background:var(--card); color:#0f172a;
+      border-radius:20px; overflow:hidden;
+      border:1px solid #e5e7eb;
+      box-shadow:0 10px 24px rgba(0,0,0,.12);
+      display:flex; flex-direction:row; gap:16px; align-items:center;
+      padding:14px;
+    }
+    .thumb{
+      flex:0 0 44%;
+      aspect-ratio: 16/10;
+      border-radius:14px; overflow:hidden; background:#f3f4f6;
+    }
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .card h4{margin:0 0 6px 0}
+    .meta{font-size:.9rem;color:#475569; display:flex; gap:10px; flex-wrap:wrap}
+    .price{font-weight:700}
+    .actions{margin-top:10px; display:flex; gap:8px; flex-wrap:wrap}
+    .btn{
+      border:0; padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:700
+    }
+    .btn.primary{background:var(--brand); color:white}
+    .btn.primary:hover{background:var(--brand-2)}
+    .btn.ghost{background:#eef2ff}
+    .tag{font-size:.75rem; padding:6px 10px; background:#e5e7eb; border-radius:999px; font-weight:700}
+
+    /* My bookings */
+    .list{display:grid; gap:12px}
+    .ticket{
+      background:#111827; border:1px solid rgba(255,255,255,.08); color:#e5e7eb;
+      border-radius:18px; padding:14px; display:flex; justify-content:space-between; align-items:center; gap:12px
+    }
+    .ticket .title{font-weight:800}
+    .ticket .sub{color:var(--muted); font-size:.9rem}
+    .ticket .controls{display:flex; gap:8px}
+    .btn.danger{background:var(--danger); color:white}
+    .btn.ok{background:var(--ok); color:#052e2b}
+
+    /* Modal */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(2,6,23,.6);
+      display:none; align-items:center; justify-content:center; z-index:20;
+    }
+    .modal{
+      width:min(560px,92vw); background:#0b1220; color:#e5e7eb;
+      border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:18px;
+      box-shadow:0 16px 40px rgba(0,0,0,.45)
+    }
+    .modal h3{margin:0 0 4px}
+    .modal .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    .modal label{font-size:.9rem; color:#cbd5e1; display:block; margin:10px 0 6px}
+    .modal .form-input{
+      width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.16);
+      background:#0a1020; color:#e5e7eb; outline:none;
+    }
+    .total{display:flex; align-items:center; justify-content:space-between; margin-top:14px; padding:12px; background:#0a1020; border-radius:12px}
+    .modal .footer{display:flex; justify-content:flex-end; gap:10px; margin-top:14px}
+    .backdrop-show{display:flex}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  </style>
+</head>
+
+<body>
+  <!-- ====== Header / Nav ====== -->
+  <header class="site" role="banner" aria-label="Main header">
+    <nav class="nav" aria-label="Primary">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">🎟</div>
+        <span>Smart Event Booking</span>
+      </div>
+      <a href="#events">Events</a>
+      <a href="#bookings">My Bookings</a>
+      <a href="#contact">Contact</a>
+	  <a href="login.html">Login</a>
+	  <a href="#" id="logoutLink" style="display:none;">Logout</a>
+      <div class="spacer"></div>
+      <span class="chip">Secure • Fast • Simple</span>
+    </nav>
+  </header>
+
+
+  <div class="container">
+    <!-- ====== Sidebar (Filters like the sample) ====== -->
+    <aside class="sidebar" aria-label="Filters">
+      <h2>Find Events</h2>
+      <p>Choose your vibe and book today!</p>
+      <div class="filters" role="search">
+        <input id="q" class="input" type="search" placeholder="Search: music, food, tech…" />
+        <select id="category">
+          <option value="all">All categories</option>
+          <option value="music">Music</option>
+          <option value="tech">Tech</option>
+          <option value="food">Food & Culture</option>
+          <option value="sports">Sports</option>
+        </select>
+        <select id="city">
+          <option value="any">Any city</option>
+          <option>Bengaluru</option><option>Hyderabad</option>
+          <option>Mumbai</option><option>Delhi</option><option>Chennai</option>
+        </select>
+        <button class="clear-btn" id="resetFilters" type="button">Reset filters</button>
+		<button id="logoutBtn" class="btn danger">Logout</button>
+      </div>
+    </aside>
+
+    <!-- ====== Main Content ====== -->
+    <main>
+      <!-- Events -->
+      <section id="events" aria-labelledby="events-title">
+        <div class="section-header">
+          <h3 id="events-title">Upcoming Events</h3>
+          <span class="muted" id="events-count">0 events</span>
+        </div>
+        <div class="grid" id="eventsGrid" role="list"></div>
+      </section>
+
+      <!-- My Bookings -->
+      <section id="bookings" aria-labelledby="bookings-title" style="margin-top:26px">
+        <div class="section-header">
+          <h3 id="bookings-title">My Bookings</h3>
+          <span class="muted">Stored locally on this device</span>
+        </div>
+        <div class="list" id="bookingList" role="list">
+          <div class="muted">No bookings yet. Book an event to see it here.</div>
+        </div>
+      </section>
+
+      <!-- Contact -->
+<section id="contact" aria-labelledby="contact-title" style="margin-top:26px">
+  <div class="section-header">
+    <h3 id="contact-title">Contact</h3>
+  </div>
+  <p class="muted">
+    Need help? Email
+    <a href="mailto:smarteventbooking@gmail.com" style="color:#c7d2fe">smarteventbooking@gmail.com</a>
+    or call
+    <a href="tel:9398386045" style="color:#c7d2fe">9398386045</a>
+  </p>
+</section>
+
+
+  <!-- ====== Booking Modal ====== -->
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+    <div class="modal">
+      <h3 id="modalTitle">Book Event</h3>
+      <div class="muted" id="modalSubtitle">Fill the details to confirm your ticket</div>
+
+      <form id="bookingForm" autocomplete="on">
+        <label for="custName">Full Name</label>
+        <input id="custName" class="form-input" required placeholder="Your name" />
+
+        <label for="custEmail">Email</label>
+        <input id="custEmail" type="email" class="form-input" required placeholder="you@example.com" />
+
+        <div class="row">
+          <div>
+            <label for="tickets">Tickets</label>
+            <input id="tickets" type="number" min="1" value="1" class="form-input" required />
+          </div>
+          <div>
+            <label for="date">Date</label>
+            <input id="date" type="date" class="form-input" required />
+          </div>
+        </div>
+
+        <div class="total">
+          <strong>Total</strong>
+          <div><span class="price" id="totalPrice">₹0</span> <span class="muted" id="unitPrice"></span></div>
+        </div>
+
+        <div class="footer">
+          <button class="btn" type="button" id="closeModal">Cancel</button>
+          <button class="btn primary" type="submit">Confirm Booking</button>
+        </div>
+
+        <input type="text" class="sr-only" id="eventId" aria-hidden="true" tabindex="-1" />
+      </form>
+    </div>
+  </div>
+
+  <!-- ====== Scripts ====== -->
+<script>
+  // ---- Event catalog (same) ----
+  const EVENTS = [
+    {
+      id: "ev_music_1",
+      title: "Sunset Music Concert",
+      category: "music",
+      city: "Chennai",
+      date: "2025-08-25",
+      price: 799,
+      img: "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?q=80&w=1200&auto=format&fit=crop"
+    },
+    {
+      id: "ev_tech_1",
+      title: "NextGen Tech Conference",
+      category: "tech",
+      city: "Chennai",
+      date: "2025-09-05",
+      price: 1299,
+      img: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?q=80&w=1200&auto=format&fit=crop"
+    },
+    {
+      id: "ev_food_1",
+      title: "Global Food & Culture Fest",
+      category: "food",
+      city: "Chennai",
+      date: "2025-09-12",
+      price: 499,
+      img: "https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?q=80&w=1200&auto=format&fit=crop"
+    },
+    {
+      id: "ev_sports_1",
+      title: "City Marathon – 10K",
+      category: "sports",
+      city: "Chennai",
+      date: "2025-10-01",
+      price: 699,
+      img: "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=1200&auto=format&fit=crop"
+    },
+    {
+      id: "ev_music_2",
+      title: "Indie Night Live",
+      category: "music",
+      city: "Chennai",
+      date: "2025-08-28",
+      price: 599,
+      img: "https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=1200&auto=format&fit=crop"
+    }
+  ];
+
+  // ---- Elements ----
+  const grid = document.getElementById("eventsGrid");
+  const eventsCount = document.getElementById("events-count");
+  const q = document.getElementById("q");
+  const categorySel = document.getElementById("category");
+  const citySel = document.getElementById("city");
+  const resetBtn = document.getElementById("resetFilters");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const logoutLink = document.getElementById("logoutLink");
+  const loginLink = document.querySelector('a[href="login.html"]');
+
+  // ---- Login/Logout state handling ----
+  function updateLoginStateUI() {
+    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+    if (loggedIn) {
+      if (loginLink) loginLink.style.display = "none";
+      if (logoutLink) logoutLink.style.display = "inline-block";
+      if (logoutBtn) logoutBtn.style.display = "inline-block";
+    } else {
+      if (loginLink) loginLink.style.display = "inline-block";
+      if (logoutLink) logoutLink.style.display = "none";
+      if (logoutBtn) logoutBtn.style.display = "none";
+    }
+  }
+
+  function handleLogout() {
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("loggedInUser");
+    alert("You have been logged out!");
+    updateLoginStateUI();
+    window.location.href = "login.html";
+  }
+
+  if (logoutBtn) logoutBtn.addEventListener("click", handleLogout);
+  if (logoutLink) logoutLink.addEventListener("click", handleLogout);
+
+  // ---- Helper functions ----
+  const money = n => `₹${Number(n).toLocaleString("en-IN")}`;
+
+  function applyFilters(list){
+    const term = q.value.trim().toLowerCase();
+    const cat = categorySel.value;
+    const city = citySel.value;
+
+    return list.filter(e => {
+      const matchTerm = term ? (e.title.toLowerCase().includes(term) || e.category.includes(term) || e.city.toLowerCase().includes(term)) : true;
+      const matchCat = cat === "all" ? true : e.category === cat;
+      const matchCity = city === "any" ? true : e.city === city;
+      return matchTerm && matchCat && matchCity;
+    });
+  }
+
+  function renderEvents(){
+    grid.innerHTML = "";
+    const items = applyFilters(EVENTS);
+    eventsCount.textContent = `${items.length} event${items.length!==1?"s":""}`;
+
+    for(const e of items){
+      const card = document.createElement("article");
+      card.className = "card";
+      card.setAttribute("role","listitem");
+      card.innerHTML = `
+        <div class="thumb"><img src="${e.img}" alt=""></div>
+        <div style="flex:1">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+            <h4>${e.title}</h4>
+            <span class="tag">${e.category.toUpperCase()}</span>
+          </div>
+          <div class="meta">
+            <span>📍 ${e.city}</span>
+            <span>📅 ${new Date(e.date).toLocaleDateString('en-IN')}</span>
+            <span class="price">${money(e.price)}</span>
+          </div>
+          <div class="actions">
+            <button class="btn primary" data-book="${e.id}">Book Now</button>
+            <button class="btn ghost" data-details="${e.id}">Details</button>
+          </div>
+        </div>`;
+      grid.appendChild(card);
+    }
+  }
+
+  // ---- Booking list ----
+  const LS_KEY = "smart-event-bookings";
+  const getBookings = () => JSON.parse(localStorage.getItem(LS_KEY) || "[]");
+  const saveBookings = data => localStorage.setItem(LS_KEY, JSON.stringify(data));
+
+  const bookingList = document.getElementById("bookingList");
+  function renderBookings(){
+    const data = getBookings();
+    bookingList.innerHTML = "";
+    if(!data.length){
+      bookingList.innerHTML = `<div class="muted">No bookings yet. Book an event to see it here.</div>`;
+      return;
+    }
+    for(const b of data){
+      const row = document.createElement("div");
+      row.className = "ticket";
+      row.innerHTML = `
+        <div>
+          <div class="title">${b.title}</div>
+          <div class="sub">📍 ${b.city} • 📅 ${new Date(b.date).toLocaleDateString('en-IN')} • 👥 ${b.tickets} • ${money(b.total)}</div>
+        </div>
+        <div class="controls">
+          <a class="btn ok" href="#events">Book more</a>
+          <button class="btn danger" data-cancel="${b.id}">Cancel</button>
+        </div>`;
+      bookingList.appendChild(row);
+    }
+  }
+
+  // ---- Booking modal ----
+  const modalBackdrop = document.getElementById("modalBackdrop");
+  const bookingForm = document.getElementById("bookingForm");
+  const closeModalBtn = document.getElementById("closeModal");
+  const ticketsInput = document.getElementById("tickets");
+  const unitPrice = document.getElementById("unitPrice");
+  const totalPrice = document.getElementById("totalPrice");
+  const eventIdInput = document.getElementById("eventId");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalSubtitle = document.getElementById("modalSubtitle");
+
+  function openModal(eventId){
+    const e = EVENTS.find(x => x.id === eventId);
+    if(!e) return;
+    eventIdInput.value = e.id;
+    ticketsInput.value = 1;
+    unitPrice.textContent = `@ ${money(e.price)} per ticket`;
+    totalPrice.textContent = money(e.price);
+    modalTitle.textContent = `Book: ${e.title}`;
+    modalSubtitle.textContent = `${e.city} • ${new Date(e.date).toLocaleDateString('en-IN')}`;
+    document.getElementById("date").value = e.date;
+    modalBackdrop.classList.add("backdrop-show");
+  }
+  function closeModal(){ modalBackdrop.classList.remove("backdrop-show"); }
+
+  ticketsInput.addEventListener("input", ()=>{
+    const e = EVENTS.find(x => x.id === eventIdInput.value);
+    const qty = Math.max(1, Number(ticketsInput.value || 1));
+    totalPrice.textContent = money(qty * (e?.price || 0));
+  });
+
+  grid.addEventListener("click", (ev)=>{
+    const bookId = ev.target.getAttribute("data-book");
+    const detailsId = ev.target.getAttribute("data-details");
+
+    if(bookId){
+      const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+      if (loggedIn) {
+        openModal(bookId);
+      } else {
+        alert("Please login before booking.");
+        window.location.href = "login.html";
+      }
+    }
+    if(detailsId){
+      const e = EVENTS.find(x => x.id === detailsId);
+      alert(`${e.title}\nCity: ${e.city}\nDate: ${new Date(e.date).toLocaleDateString('en-IN')}\nCategory: ${e.category}\nPrice: ${money(e.price)}`);
+    }
+  });
+
+  closeModalBtn.addEventListener("click", closeModal);
+  modalBackdrop.addEventListener("click", (e)=>{ if(e.target===modalBackdrop) closeModal(); });
+
+  bookingForm.addEventListener("submit", (e)=>{
+    e.preventDefault();
+    const id = eventIdInput.value;
+    const ev = EVENTS.find(x => x.id === id);
+    const name = document.getElementById("custName").value.trim();
+    const email = document.getElementById("custEmail").value.trim();
+    const date = document.getElementById("date").value;
+    const tickets = Math.max(1, Number(ticketsInput.value || 1));
+    if(!ev || !name || !email || !date){ return; }
+
+    const record = {
+      id: `${id}_${Date.now()}`,
+      eventId: id,
+      title: ev.title,
+      city: ev.city,
+      date,
+      tickets,
+      total: tickets * ev.price,
+      customer: { name, email }
+    };
+    const data = getBookings();
+    data.push(record);
+    saveBookings(data);
+    renderBookings();
+    closeModal();
+    alert("Proceeding to payment...");
+    // save booking data for payment.html
+    localStorage.setItem("lastBooking", JSON.stringify({
+      name,
+      email,
+      eventTitle: ev.title,
+      total: tickets * ev.price
+    }));
+    window.location.href = "payment-options.html";
+
+  });
+
+  bookingList.addEventListener("click", (ev)=>{
+    const cancelId = ev.target.getAttribute("data-cancel");
+    if(cancelId){
+      const data = getBookings().filter(b => b.id !== cancelId);
+      saveBookings(data);
+      renderBookings();
+    }
+  });
+
+  q.addEventListener("input", renderEvents);
+  categorySel.addEventListener("change", renderEvents);
+  citySel.addEventListener("change", renderEvents);
+  resetBtn.addEventListener("click", ()=>{
+    q.value=""; categorySel.value="all"; citySel.value="any"; renderEvents();
+  });
+
+  // ---- Init ----
+  updateLoginStateUI();
+  renderEvents();
+  renderBookings();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Choose Payment — Smart Event Booking</title>
+  <style>
+    body{ margin:0; font-family:Poppins, sans-serif; background:linear-gradient(135deg,#0f172a,#1e293b); min-height:100vh; display:flex;align-items:center;justify-content:center;color:#fff;}
+    .wrap{ width:420px;background:#0b1220;padding:28px;border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.5); text-align:center;}
+    h2{ color:#60a5fa; margin:0 0 18px;}
+    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px;}
+    .pay{ background:#0f172a; padding:12px;border-radius:10px; cursor:pointer; border:1px solid #122; display:flex; gap:8px; align-items:center; justify-content:center; flex-direction:column;}
+    .pay img{ width:48px; height:28px; object-fit:contain; }
+    .pay span{ font-weight:700; color:#dbeafe;}
+    .note{ margin-top:14px; color:#94a3b8; font-size:14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h2>Select Payment Method</h2>
+    <div class="grid">
+      <div class="pay" onclick="choose('upi')"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg" alt="UPI"><span>UPI</span></div>
+      <div class="pay" onclick="choose('card')"><img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Card"><span>Card</span></div>
+      <div class="pay" onclick="choose('phonepe')"><img src="https://seeklogo.com/images/P/phonepe-logo-7BD3E3B26A-seeklogo.com.png" alt="PhonePe"><span>PhonePe</span></div>
+      <div class="pay" onclick="choose('gpay')"><img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="GPay"><span>Google Pay</span></div>
+    </div>
+    <div class="note">We redirect you to a secure payment page. Booking details are preserved for the payment step.</div>
+  </div>
+
+<script>
+function choose(method){
+  const booking = localStorage.getItem('bookingData');
+  if(!booking){
+    alert('Booking not found. Please book again.');
+    window.location.href = 'booking.html';
+    return;
+  }
+  // route to pages
+  if(method === 'upi') window.location.href = 'upi-payment.html';
+  else if(method === 'card') window.location.href = 'card-payment.html';
+  else if(method === 'phonepe') window.location.href = 'phonepe-payment.html';
+  else if(method === 'gpay') window.location.href = 'gpay-payment.html';
+}
+</script>
+</body>
+</html>
